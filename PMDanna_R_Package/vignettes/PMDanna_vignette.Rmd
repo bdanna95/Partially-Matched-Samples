@@ -1,0 +1,88 @@
+---
+title: "P-Values Pooling Approach for Partially Matched Samples"
+author: "Brandon D'Anna"
+date: "`r Sys.Date()`"
+description: >
+  In this vignette, we work through the implementation of statistical methods for partially matched samples using the p-values pooling approach described in (Kuan & Huang,2013). To do so, we will recast the partially matched samples as coming from two experimental designs, one with n1 matched pairs or 
+  repeated measures and one with independent groups with n2 and n3 observations per group.
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{P-Values Pooling Approach for Partially Matched Samples}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In this vignette, we work through the implementation of statistical methods for partially matched samples using the p-values pooling approach described in Kuan & Huang [1]. To do so, we will recast the partially matched samples as coming from two experimental designs, one with n1 matched pairs or repeated measures and one with independent groups with n2 and n3 observations per group, respectively. We will walk through:
+
+* How to use the p.values.pooling function to test the equality of two correlated means with partially matched sample data.
+  
+* The 5 different statistical methods available for use in the p.values.pooling function.
+
+* How to access the individual functions for each of the 5 different statistical methods.
+
+Note that each of the functions mentioned in this vignette contain a hep file which can be accessed for additional information regarding arguments, values, and examples.
+
+We'll start by loading PValPooling:
+
+```{r, message = FALSE}
+library(PMDanna)
+```
+
+Next, let's load the colondat `data.frame` which contains nontumorous and tumor tissue paired samples from 84 individuals across numerous microRNA :
+
+```{r, message = FALSE}
+data(colondat)
+```
+
+The colondat `data.frame` is the same publically available microRNA expression data used in the case study of Kuan and Huang [1]. To view the data description of this dataset, use:
+
+```{r, message = FALSE}
+?colondat
+```
+
+## `p.values.pooling()`
+
+The main function of this library is `p.values.pooling()`: it takes two vectors that, together make up a paired sample, and applies the statistical method of choice:
+
+```{r}
+by_liptak <- p.values.pooling(colondat$`araB 1bn`,colondat$`araB 1bT`)
+by_kim <- p.values.pooling(colondat$`araB 1bn`,colondat$`araB 1bT`,method = "kim")
+by_linsilver <- p.values.pooling(colondat$`araB 1bn`,colondat$`araB 1bT`,method = "linsilver")
+by_looneyjones <- p.values.pooling(colondat$`araB 1bn`,colondat$`araB 1bT`,method = "looneyjones")
+by_ekbohm <- p.values.pooling(colondat$`araB 1bn`,colondat$`araB 1bT`,method = "ekbohm")
+```
+
+You can see the statistic and p-value when you print the result from each respective method passed through the function:
+
+```{r}
+by_liptak
+by_kim
+by_linsilver
+by_looneyjones
+by_ekbohm
+```
+
+## Individual Functions
+While we recommend the users primarily use the `p.values.pooling()` function, the methods taken as argument each have its own individual function. Each of these functions take the same three arguments. These functions include:
+
+```{r}
+by_liptaki <- liptak.z.test(colondat$`araB 1bn`,colondat$`araB 1bT`)
+by_kimi <- kim.t.test(colondat$`araB 1bn`,colondat$`araB 1bT`)
+by_linsilveri <- linsilver.mle.test(colondat$`araB 1bn`,colondat$`araB 1bT`)
+by_looneyjonesi <- looneyjones.z.test(colondat$`araB 1bn`,colondat$`araB 1bT`)
+by_ekbohmi <- ekbohm.mle.test(colondat$`araB 1bn`,colondat$`araB 1bT`)
+```
+
+The above individual functions will return the same results as the `p.values.pooling()` function.
+
+We refer the reader to Kuan and Huang [1] for a detailed description of the methods implemented in the `p.values.pooling()` function and respective individual functions.
+
+## References
+1. Kuan, P., & Huang, B. (2013). A simple and robust method for partially matched samples using thep-values pooling approach. Statistics In Medicine, 32(19), 3247-3259. doi: 10.1002/sim.5758
